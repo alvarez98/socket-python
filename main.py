@@ -1,11 +1,11 @@
 import socketio
 import eventlet
 import eventlet.wsgi
-from flask import Flask, render_template
+from flask import Flask
+from flask import render_template
 
 sio = socketio.Server()
 app = Flask(__name__)
-
 
 @app.route('/')
 def index():
@@ -17,18 +17,22 @@ def index():
 def connect(sid, environ):
     print("connect ", sid)
 
+@sio.on('connect', namespace='/rpi')
+def connect(sid, environ):
+    print("connect ", sid)
+
 # send data to specific client
-@sio.on('chat message', namespace='/chat')
+@sio.on('rpi message', namespace='/rpi')
 def message(sid, data):
-    sio.emit('reply', {'data': 'foobar'}, namespace='/chat', room=sid)
+    sio.emit('chat_message', {'data': 'hola'}, namespace='/chat')
     print("message ", data)
 
-# without Namespaces, send data to all clients
-@sio.on('everybody')
-def metrics(sid, metrics):
-    from random import random
-    sio.emit('metrics', { 'metrics': random() })
-    print("message ", metrics)
+# # without Namespaces, send data to all clients
+# @sio.on('everybody')
+# def metrics(sid, metrics):
+#     from random import random
+#     sio.emit('metrics', { 'metrics': random() })
+#     print("message ", metrics)
 
 # listen disconnections
 @sio.on('disconnect')
